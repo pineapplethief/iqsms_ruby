@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'iqsms/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'iqsms_ruby'
+  spec.name          = 'iqsms'
   spec.version       = IqSMS::VERSION
   spec.authors       = ['Aleksey Glukhov']
   spec.email         = ['gluhov1985@gmail.com']
