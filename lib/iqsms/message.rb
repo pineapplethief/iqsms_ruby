@@ -6,9 +6,9 @@ module IqSMS
         phone: message.phone,
         text: message.text
       }
-      hash[:wap_url] = message.wap_url if message.wap_url.present?
+      hash[:wap_url] = message.wap_url if message.respond_to?(:wap_url) && message.wap_url.present?
       hash[:sender] = message.sender if message.sender.present?
-      hash[:flash] = '1' if message.flash.present?
+      hash[:flash] = '1' if message.respond_to?(:flash) && message.flash.present?
       hash
     end
 
