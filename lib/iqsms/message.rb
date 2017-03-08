@@ -48,7 +48,7 @@ module IqSMS
 
     def update!(message_hash)
       @smsc_id = message_hash[:smscId]
-      @status = message_hash[:status]
+      @status = MessageStatus.new(message_hash[:status])
     end
 
     def flash?

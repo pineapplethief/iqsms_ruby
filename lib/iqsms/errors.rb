@@ -1,4 +1,4 @@
 module IqSMS
-  class NoResponseStatusError < StandardError
+  class MaximumMessagesLimitExceededError < StandardError
   end
 end

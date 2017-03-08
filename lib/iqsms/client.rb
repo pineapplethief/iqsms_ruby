@@ -75,9 +75,9 @@ module IqSMS
       begin
         retries ||= 0
         response = @connection.send(method, full_url(path), json: params)
-      rescue HTTP::StateError
+      rescue HTTP::StateError => error
         retries += 1
-        retry if retries < 3
+        retries < 3 ? retry : raise HTTP::StateError, error.message
       end
 
       block_given? ? yield(response) : response

@@ -11,9 +11,6 @@ module IqSMS
       end
       @hash = IqSMS::Utils.deeply_with_indifferent_access(@hash)
 
-      if @hash[:status].blank?
-        raise IqSMS::NoResponseStatusError, 'В сообщении нет статуса'.freeze
-      end
       @status = RequestStatus.new(@hash[:status], @hash[:description])
     end
   end
