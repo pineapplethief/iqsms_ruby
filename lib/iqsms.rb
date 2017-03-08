@@ -15,6 +15,7 @@ require 'iqsms/utils'
 require 'iqsms/client'
 require 'iqsms/errors'
 require 'iqsms/message'
+require 'iqsms/message_status'
 require 'iqsms/request_status'
 
 require 'iqsms/response'
