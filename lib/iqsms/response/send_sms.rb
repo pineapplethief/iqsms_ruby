@@ -1,21 +1,17 @@
 module IqSMS
   class Response
     class SendSms < Response
-      attr_reader :messages
+      attr_reader :statuses
 
-      def initialize(original_response, messages)
-        super(original_response)
+      def initialize(original_response)
+        super
 
-        @messages = messages
-        hash_messages = Array(@hash[:messages])
-        @messages.each do |message|
-          message_status_hash = hash_messages.find do |hash_message|
-            hash_message[:clientId] == message.client_id
-          end
-
-          if message_status_hash.present?
-            message.update!(message_status_hash)
-          end
+        @statuses = Array(@hash[:messages]).map do |hash_message|
+          MessageStatus.new(
+            status: hash_message[:status],
+            client_id: hash_message[:client_id],
+            smsc_id: hash_message[:smsc_id]
+          )
         end
       end
     end

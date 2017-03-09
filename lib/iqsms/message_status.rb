@@ -1,7 +1,11 @@
 module IqSMS
   class MessageStatus
-    def initialize(status)
+    attr_reader :status, :client_id, :smsc_id
+
+    def initialize(status:, client_id: nil, smsc_id: nil)
       @status = status
+      @client_id = client_id
+      @smsc_id = smsc_id
     end
 
     def queued?

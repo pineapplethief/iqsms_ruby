@@ -42,13 +42,8 @@ module IqSMS
       @wap_url = wap_url
       @sender = sender
       @smsc_id = smsc_id
-      @status = MessageStatus.new(status)
+      @status = MessageStatus.new(status: status, client_id: client_id, smsc_id: smsc_id)
       @flash = flash
-    end
-
-    def update!(message_hash)
-      @smsc_id = message_hash[:smscId]
-      @status = MessageStatus.new(message_hash[:status])
     end
 
     def flash?

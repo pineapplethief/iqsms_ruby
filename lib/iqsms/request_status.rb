@@ -16,5 +16,9 @@ module IqSMS
     def auth_failed?
       rejected? && @description == 'error authorization'.freeze
     end
+
+    def status_queue_empty?
+      @description == 'queue is empty'.freeze
+    end
   end
 end

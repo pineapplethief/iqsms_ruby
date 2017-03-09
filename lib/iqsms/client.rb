@@ -14,10 +14,6 @@ module IqSMS
       end
     end
 
-    def self.default_base_url
-      'http://json.gate.iqsms.ru'.freeze
-    end
-
     attr_reader :connection
     attr_writer :status_queue_name
 
@@ -40,7 +36,7 @@ module IqSMS
       }
 
       request(:post, 'send'.freeze, options) do |response|
-        Response::SendSms.new(response, messages)
+        Response::SendSms.new(response)
       end
     end
 
@@ -54,7 +50,22 @@ module IqSMS
       }
 
       request(:post, 'status'.freeze, options) do |response|
-        Response::Status.new(response, messages)
+        Response::Status.new(response)
+      end
+    end
+
+    def status_queue(status_queue_limit = 5)
+      if status_queue_name.blank?
+        raise ArgumentError, 'status_queue_name must be set to use status_queue endpoint'
+      end
+
+      options = {
+        statusQueueName: status_queue_name,
+        statusQueueLimit: status_queue_limit
+      }
+
+      request(:post, 'statusQueue'.freeze, options) do |response|
+        Response::StatusQueue.new(response)
       end
     end
 
@@ -80,6 +91,10 @@ module IqSMS
       @status_queue_name ||= @options[:status_queue_name]
     end
 
+    def status_queue_name=(value)
+      @status_queue_name = value
+    end
+
     private
 
     def request(method, path, **params)
@@ -91,14 +106,13 @@ module IqSMS
         begin
           retries ||= 0
 
-          response = connection
-            .headers(accept: 'application/json'.freeze)
-            .send(method, full_url(path), json: params)
+          response = connection.headers(accept: 'application/json'.freeze)
+                               .send(method, full_url(path), json: params)
 
           block_given? ? yield(response) : response
         rescue HTTP::StateError => error
           retries += 1
-          retries < 3 ? retry : raise error
+          retries < 3 ? retry : raise(error)
         ensure
           response.flush if response.present?
           connection.close if connection.present?
@@ -130,6 +144,12 @@ module IqSMS
       return if messages.size <= 200
 
       raise MaximumMessagesLimitExceededError, 'API has cap of 200 messages per one request'
+    end
+
+    def default_options
+      {
+        base_url: 'http://json.gate.iqsms.ru'.freeze
+      }
     end
 
     def authentication_params
