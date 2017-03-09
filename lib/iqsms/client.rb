@@ -1,5 +1,23 @@
 module IqSMS
   class Client
+    @mutex = Mutex.new
+
+    def self.connection_pool_for(url)
+      @mutex.synchronize do
+        @connection_pool ||= {}
+        if @connection_pool[url].blank?
+          @connection_pool[url] = ConnectionPool.new(size: 5, timeout: 5) do
+            HTTP.persistent(url)
+          end
+        end
+        @connection_pool[url]
+      end
+    end
+
+    def self.default_base_url
+      'http://json.gate.iqsms.ru'.freeze
+    end
+
     attr_reader :connection
     attr_writer :status_queue_name
 
@@ -69,21 +87,23 @@ module IqSMS
 
       params = params.reverse_merge!(authentication_params)
 
-      @connection ||= HTTP.persistent(base_url)
-                          .headers(accept: 'application/json'.freeze)
+      self.class.connection_pool_for(base_url).with do |connection|
+        begin
+          retries ||= 0
 
-      begin
-        retries ||= 0
-        response = @connection.send(method, full_url(path), json: params)
-      rescue HTTP::StateError => error
-        retries += 1
-        retries < 3 ? retry : raise HTTP::StateError, error.message
+          response = connection
+            .headers(accept: 'application/json'.freeze)
+            .send(method, full_url(path), json: params)
+
+          block_given? ? yield(response) : response
+        rescue HTTP::StateError => error
+          retries += 1
+          retries < 3 ? retry : raise error
+        ensure
+          response.flush if response.present?
+          connection.close if connection.present?
+        end
       end
-
-      block_given? ? yield(response) : response
-    ensure
-      response.flush if response.present?
-      @connection.close if @connection.present?
     end
 
     def with_value_must_be_present!(value)
@@ -112,12 +132,6 @@ module IqSMS
       raise MaximumMessagesLimitExceededError, 'API has cap of 200 messages per one request'
     end
 
-    def default_options
-      {
-        base_url: 'http://json.gate.iqsms.ru'.freeze
-      }
-    end
-
     def authentication_params
       {
         login: @login,
@@ -126,7 +140,7 @@ module IqSMS
     end
 
     def base_url
-      @options[:base_url]
+      @options[:base_url] || self.class.default_base_url
     end
 
     def base_uri

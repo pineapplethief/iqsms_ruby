@@ -8,7 +8,9 @@ require 'active_support/core_ext/hash/reverse_merge'
 require 'active_support/core_ext/hash/indifferent_access'
 require 'active_support/hash_with_indifferent_access'
 require 'addressable/uri'
+require 'connection_pool'
 require 'http'
+require 'json'
 
 require 'iqsms/utils'
 
@@ -23,6 +25,3 @@ require 'iqsms/response/balance'
 require 'iqsms/response/send_sms'
 require 'iqsms/response/senders'
 require 'iqsms/response/status'
-
-module IqSMS
-end
