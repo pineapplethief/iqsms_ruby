@@ -88,7 +88,7 @@ Phones are sent as-is, so any phone number normalization must be done in your ap
 ```ruby
 message = YourSMSModel.create(phone: '+11234567899', text: 'hey there', sender: 'one of your senders', client_id: '1')
 send_sms_response = client.send_sms(message)
-if send_sms_response.accepted?
+if send_sms_response.status.accepted?
   # do your logic to update message smsc_id and status, which are in send_sms_response.statuses
 end
 ```
@@ -98,7 +98,7 @@ end
 ```ruby
 messages = YourSMSModel.where(phone: 'bla')
 status_response = client.status(messages)
-if status_response.accepted?
+if status_response.status.accepted?
   status_response.statuses # Same as send_sms endpoint
 end
 ```
@@ -122,7 +122,7 @@ Then call endpoint as usual:
 ```ruby
   status_queue_limit = 10 # default is 5
   status_queue_response = client.status_queue(status_queue_limit)
-  if status_queue_response.accepted?
+  if status_queue_response.status.accepted?
     status_queue_response.statuses # same as send_sms and status end-points
   end
 ```
