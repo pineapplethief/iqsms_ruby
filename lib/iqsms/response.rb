@@ -5,7 +5,9 @@ module IqSMS
     def initialize(original_response)
       @original_response = original_response
       @hash = if @original_response.body.present?
-        JSON.parse(@original_response.body)
+        puts "@original_response.body = #{@original_response.body.inspect}"
+        puts "@original_response.body = #{@original_response.body.to_s}"
+        JSON.parse(@original_response.body.to_s)
       else
         {}
       end
