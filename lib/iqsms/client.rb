@@ -71,7 +71,25 @@ module IqSMS
 
     def balance
       request(:post, 'messages/v2/balance'.freeze) do |response|
-        Response::Balance.new(response)
+        response_parser = -> (response) {
+          body = response.body.to_s
+
+          balance_hash = {}
+
+          if body.present?
+            status = 'ok'
+            response_components = body.split(';')
+            balance_hash[:type] = response_components.first
+            balance_hash[:balance] = response_components.second
+            balance_hash[:credit] = response_components.third
+          else
+            status = 'error'
+          end
+
+          { status: status, balance: [balance_hash] }
+        }
+
+        Response::Balance.new(response, response_parser: response_parser)
       end
     end
 
